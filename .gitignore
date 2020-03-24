@@ -1,0 +1,7 @@
+/api/main
+task-execution-assume-role.json
+out.json
+cred.md
+ecs-params.yml
+docs/
+install/
