@@ -5,3 +5,4 @@ cred.md
 ecs-params.yml
 docs/
 install/
+.env
