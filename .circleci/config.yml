@@ -28,8 +28,7 @@ jobs:
               service up \
               --target-group-arn $ARN_LB \
               --container-name goping-test \
-              --container-port 8001 \
-              --role ecsServiceRole
+              --container-port 8001
 
 workflows:
   build-and-deploy:
