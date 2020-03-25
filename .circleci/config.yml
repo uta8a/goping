@@ -29,7 +29,7 @@ jobs:
               --load-balancer-name goping-lb \
               --container-name goping-test \
               --container-port 8001 \
-              --role gopingRole
+              --role ecsServiceRole
 
 workflows:
   build-and-deploy:
