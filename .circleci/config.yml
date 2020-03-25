@@ -26,7 +26,8 @@ jobs:
               --project-name goping-test \
               --cluster-config goping-config \
               service up \
-              --load-balancer-name goping-lb
+              --load-balancer-name goping-lb \
+              --container-name goping-test
 
 workflows:
   build-and-deploy:
