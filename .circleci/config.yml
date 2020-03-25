@@ -26,9 +26,10 @@ jobs:
               --project-name goping-test \
               --cluster-config goping-config \
               service up \
-              --load-balancer-name goping-lb \
+              --target-group-arn $ARN_LB \
               --container-name goping-test \
-              --container-port 8001
+              --container-port 8001 \
+              --role ecsServiceRole
 
 workflows:
   build-and-deploy:
