@@ -25,8 +25,8 @@ jobs:
               --ecs-params ecs-params.yml \
               --project-name goping-test \
               --cluster-config goping-config \
-              --load-balancer-name goping-lb \
-              service up
+              service up \
+              --load-balancer-name goping-lb
 
 workflows:
   build-and-deploy:
