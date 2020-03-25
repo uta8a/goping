@@ -28,7 +28,8 @@ jobs:
               service up \
               --load-balancer-name goping-lb \
               --container-name goping-test
-              --container-port 8001
+              --container-port 8001 \
+              --role gopingRole
 
 workflows:
   build-and-deploy:
