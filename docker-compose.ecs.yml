@@ -7,7 +7,7 @@ services:
     logging:
       driver: awslogs
       options:
-        awslogs-group: goecho-test
+        awslogs-group: goping-test
         awslogs-region: $AWS_DEFAULT_REGION
         awslogs-stream-prefix: api
 

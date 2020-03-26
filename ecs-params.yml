@@ -1,6 +1,6 @@
 version: 1
 task_definition:
-  task_execution_role: goechoRole
+  task_execution_role: gopingRole
   ecs_network_mode: awsvpc
   task_size:
     mem_limit: 0.5GB
@@ -11,6 +11,7 @@ run_params:
       subnets:
         - $SUBNET_1
         - $SUBNET_2
+        - $SUBNET_3
       security_groups:
         - $SECURITY_GROUP
       assign_public_ip: ENABLED
