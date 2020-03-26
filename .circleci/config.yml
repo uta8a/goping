@@ -25,11 +25,7 @@ jobs:
               --ecs-params ecs-params.yml \
               --project-name goping-test \
               --cluster-config goping-config \
-              service up \
-              --target-group-arn $ARN_LB \
-              --container-name goping-test \
-              --container-port 8001
-
+              service up
 workflows:
   build-and-deploy:
     # Run the welcome/run job in its own container
