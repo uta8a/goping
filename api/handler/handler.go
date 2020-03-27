@@ -36,7 +36,7 @@ func GetAllInfo() echo.HandlerFunc {
 		res := info{
 			Ip          : c.RealIP(),
 			Host        : req.Host,
-			CountryCode : "not implemented",
+			CountryCode : "JP not implemented",
 			Ua          : "not implemented",
 			Port        : "not implemented",
 			Lang        : "not implemented",
