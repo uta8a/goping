@@ -27,7 +27,8 @@ jobs:
               -f docker-compose.ecs.yml \
               --ecs-params ecs-params.yml \
               --cluster fargate-sample-cluster \
-              service up
+              service up \
+              --timeout 10
 workflows:
   build-and-deploy:
     # Run the welcome/run job in its own container
