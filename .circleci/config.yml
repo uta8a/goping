@@ -16,15 +16,15 @@ jobs:
             sudo curl -o /usr/local/bin/ecs-cli https://amazon-ecs-cli.s3.amazonaws.com/ecs-cli-linux-amd64-latest
             sudo chmod +x /usr/local/bin/ecs-cli
             ecs-cli --version
-            ecs-cli configure --cluster goping-cluster --default-launch-type FARGATE --region $AWS_REGION --config-name goping-config
+            ecs-cli configure --cluster fargate-sample-cluster --default-launch-type FARGATE --region $AWS_REGION --config-name fargate-sample
       - run:
           name: update
           command: |
             ecs-cli compose \
-              --file docker-compose.ecs.yml \
+              --project-name fargate-sample \
+              -f docker-compose.ecs.yml \
               --ecs-params ecs-params.yml \
-              --project-name goping-test \
-              --cluster-config goping-config \
+              --cluster fargate-sample-cluster \
               service up
 workflows:
   build-and-deploy:
