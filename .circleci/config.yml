@@ -16,7 +16,9 @@ jobs:
             sudo curl -o /usr/local/bin/ecs-cli https://amazon-ecs-cli.s3.amazonaws.com/ecs-cli-linux-amd64-latest
             sudo chmod +x /usr/local/bin/ecs-cli
             ecs-cli --version
+             ecs-cli configure profile --profile-name fargate-sample --access-key $AWS_ACCESS_KEY_ID --secret-key $AWS_SECRET_ACCESS_KEY
             ecs-cli configure --cluster fargate-sample-cluster --default-launch-type FARGATE --region $AWS_REGION --config-name fargate-sample
+            ecs-cli configure profile default --profile-name fargate-sample
       - run:
           name: update
           command: |
