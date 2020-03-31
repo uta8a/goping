@@ -34,11 +34,13 @@ workflows:
     # Run the welcome/run job in its own container
     jobs:
       - aws-ecr/build-and-push-image:
+          name: api
           account-url: AWS_ECR_ACCOUNT_URL
           path: './api' # Dockerfile
           repo: 'goecho-api'
           tag: '${CIRCLE_SHA1}'
       - aws-ecr/build-and-push-image:
+          name: www
           account-url: AWS_ECR_ACCOUNT_URL
           path: './www' # Dockerfile
           repo: 'goping-www'
@@ -53,4 +55,5 @@ workflows:
 
       - deployment:
           requires:
-            - aws-ecr/build-and-push-image
+            - api
+            - www
