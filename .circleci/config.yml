@@ -38,6 +38,11 @@ workflows:
           path: './api' # Dockerfile
           repo: 'goecho-api'
           tag: '${CIRCLE_SHA1}'
+      - aws-ecr/build-and-push-image:
+          account-url: AWS_ECR_ACCOUNT_URL
+          path: './www' # Dockerfile
+          repo: 'goping-www'
+          tag: '${CIRCLE_SHA1}'
       
       # - aws-ecs/deploy-service-update:
       #     requires:
