@@ -9,6 +9,7 @@ WORKDIR /app
 COPY frontend/ ./frontend
 WORKDIR /app/frontend
 
+RUN npm install
 RUN npm run build
 
 # production
