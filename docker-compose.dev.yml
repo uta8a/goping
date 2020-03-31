@@ -6,3 +6,11 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8001:8001"
+  frontend:
+    build:
+      context: ./www
+      dockerfile: Dockerfile
+    depends_on:
+      - "api"
+    ports:
+      - "80:80"

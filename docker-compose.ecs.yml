@@ -8,8 +8,18 @@ services:
     logging:
       driver: awslogs
       options:
-        awslogs-group: goping-test
+        awslogs-group: goping-api
         awslogs-region: $AWS_DEFAULT_REGION
         awslogs-stream-prefix: api
-
-# environmentを使う
+  frontend:
+    image: $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/goping-www:$CIRCLE_SHA1
+    depends_on:
+      - "api"
+    ports:
+      - "80:80"
+    logging:
+      driver: awslogs
+      options:
+        awslogs-group: goping-api
+        awslogs-region: $AWS_DEFAULT_REGION
+        awslogs-stream-prefix: www  
