@@ -13,6 +13,7 @@ services:
         awslogs-stream-prefix: api
   frontend:
     image: $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/goping-www:$CIRCLE_SHA1
+    # image: $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/goping-www:latest
     depends_on:
       - "api"
     ports:
@@ -20,6 +21,6 @@ services:
     logging:
       driver: awslogs
       options:
-        awslogs-group: goping-api
+        awslogs-group: goping-www
         awslogs-region: $AWS_DEFAULT_REGION
         awslogs-stream-prefix: www  
