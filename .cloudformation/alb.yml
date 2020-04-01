@@ -1,0 +1,108 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Fargate ALB
+
+Parameters:
+  EnvType:
+    Description: Environment type.
+    Default: dev
+    Type: String
+    AllowedValues:
+      - dev
+      - stg
+      - prod
+
+Resources:
+  TargetGroupApi:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: !Join ['-', ['goping-api', !Ref EnvType, 'tg']]
+      VpcId: {'Fn::ImportValue': !Join ['-', ['Fn::Sub':'${AWS::AccountId}', 'Fn::Sub':'${AWS::Region}', 'test-vpc']]}
+      # HealthCheck
+      HealthCheckIntervalSeconds: 30
+      HealthCheckPath: '/hc'
+      HealthCheckPort: 8001
+      HealthCheckProtocol: HTTP
+      HealthCheckTimeoutSeconds: 5
+      HealthyThresholdCount: 5
+      UnhealthyThresholdCount: 2
+      Matcher:
+        HttpCode: 200
+      # Routing
+      Port: 8001
+      Protocol: HTTP
+      TargetType: ip
+      TargetGroupAttributes:
+        # ターゲットの登録解除までの待機時間
+        - Key: deregistration_delay.timeout_seconds
+          Value: 60
+      Tags:
+        - Key: Name
+          Value: !Join ['-', ['goping-api', !Ref EnvType, 'tg']]
+        - Key: Env
+          Value: !Ref EnvType
+  TargetGroupFront:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: !Join ['-', ['goping-front', !Ref EnvType, 'tg']]
+      VpcId: {'Fn::ImportValue': !Join ['-', ['Fn::Sub':'${AWS::AccountId}', 'Fn::Sub':'${AWS::Region}', 'test-vpc']]}
+      # HealthCheck
+      HealthCheckIntervalSeconds: 30
+      HealthCheckPath: '/'
+      HealthCheckPort: 80
+      HealthCheckProtocol: HTTP
+      HealthCheckTimeoutSeconds: 5
+      HealthyThresholdCount: 5
+      UnhealthyThresholdCount: 2
+      Matcher:
+        HttpCode: 200
+      # Routing
+      Port: 80
+      Protocol: HTTP
+      TargetType: ip
+      TargetGroupAttributes:
+        # ターゲットの登録解除までの待機時間
+        - Key: deregistration_delay.timeout_seconds
+          Value: 60
+      Tags:
+        - Key: Name
+          Value: !Join ['-', ['goping-front', !Ref EnvType, 'tg']]
+        - Key: Env
+          Value: !Ref EnvType
+  ALB:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Type: application
+      Name: !Join ['-', ['goping', !Ref EnvType, 'alb']]
+      SecurityGroups: !Split [',', {'Fn::ImportValue': !Join ['-', ['Fn::Sub':'${AWS::AccountId}', 'Fn::Sub':'${AWS::Region}', 'test-default-sg']]}]
+      IpAddressType: ipv4
+      Scheme: internet-facing
+      Subnets: !Split [',', {'Fn::ImportValue': !Join ['-', ['Fn::Sub':'${AWS::AccountId}', 'Fn::Sub':'${AWS::Region}', 'test-subnets']]}]
+      # MEMO
+      # https://docs.aws.amazon.com/ja_jp/elasticloadbalancing/latest/APIReference/API_LoadBalancerAttribute.html
+      # https://docs.aws.amazon.com/ja_jp/elasticloadbalancing/latest/application/application-load-balancers.html#load-balancer-attributes
+      LoadBalancerAttributes:
+        - Key: idle_timeout.timeout_seconds
+          Value: 60
+      Tags:
+        - Key: Name
+          Value: !Join ['-', ['goping', !Ref EnvType, 'alb']]
+        - Key: Env
+          Value: !Ref EnvType
+  HTTPListener1:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref TargetGroupFront
+      LoadBalancerArn: !Ref ALB
+      Port: 80
+      Protocol: HTTP
+  HTTPListener2:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref TargetGroupApi
+      LoadBalancerArn: !Ref ALB
+      Port: 8001
+      Protocol: HTTP

@@ -1,0 +1,18 @@
+version: "3"
+services:
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    ports:
+      - "8001:8001"
+  frontend:
+    build:
+      context: ./www
+      dockerfile: Dockerfile
+      args:
+        VUE_APP_API_HOST: $VUE_APP_API_HOST
+    depends_on:
+      - "api"
+    ports:
+      - "80:80"

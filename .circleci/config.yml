@@ -1,13 +1,66 @@
-# Use the latest 2.1 version of CircleCI pipeline process engine. See: https://circleci.com/docs/2.0/configuration-reference
 version: 2.1
-# Use a package of configuration called an orb.
 orbs:
-  # Declare a dependency on the welcome-orb
-  welcome: circleci/welcome-orb@0.4.1
-# Orchestrate or schedule a set of jobs
+  aws-ecr: circleci/aws-ecr@6.7.1
+  aws-ecs: circleci/aws-ecs@1.1.0
+
+jobs:
+  deployment:
+    docker:
+      - image: circleci/python:3.8.2
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - run:
+          name: ecs-cli install and configure
+          command: |
+            sudo curl -o /usr/local/bin/ecs-cli https://amazon-ecs-cli.s3.amazonaws.com/ecs-cli-linux-amd64-latest
+            sudo chmod +x /usr/local/bin/ecs-cli
+            ecs-cli --version
+            ecs-cli configure profile --profile-name fargate-sample --access-key $AWS_ACCESS_KEY_ID --secret-key $AWS_SECRET_ACCESS_KEY
+            ecs-cli configure --cluster fargate-sample-cluster --default-launch-type FARGATE --region $AWS_DEFAULT_REGION --config-name fargate-sample
+            ecs-cli configure profile default --profile-name fargate-sample
+      - run:
+          name: update
+          command: |
+            ecs-cli compose \
+              --project-name goping-api \
+              -f docker-compose.ecs.yml \
+              --ecs-params ecs-params.yml \
+              --cluster fargate-sample-cluster \
+              service up
+            ecs-cli compose \
+              --project-name goping-front \
+              -f docker-compose.ecs.yml \
+              --ecs-params ecs-params.yml \
+              --cluster fargate-sample-cluster \
+              service up
+
 workflows:
-  # Name the workflow "welcome"
-  welcome:
+  build-and-deploy:
     # Run the welcome/run job in its own container
     jobs:
-      - welcome/run
+      - aws-ecr/build-and-push-image:
+          name: api
+          account-url: AWS_ECR_ACCOUNT_URL
+          path: './api' # Dockerfile
+          repo: 'goping-api'
+          tag: '${CIRCLE_SHA1}'
+      - aws-ecr/build-and-push-image:
+          name: front
+          account-url: AWS_ECR_ACCOUNT_URL
+          path: './www' # Dockerfile
+          repo: 'goping-front'
+          tag: '${CIRCLE_SHA1}'
+          extra-build-args: "--build-arg VUE_APP_API_HOST=$VUE_APP_API_HOST"
+      
+      # - aws-ecs/deploy-service-update:
+      #     requires:
+      #       - aws-ecr/build-and-push-image
+      #     family: '${MY_APP_PREFIX}-service'
+      #     cluster-name: '${MY_APP_PREFIX}-cluster'
+      #     container-image-name-updates: 'container=${MY_APP_PREFIX}-service,tag=${CIRCLE_SHA1}'
+
+      - deployment:
+          requires:
+            - api
+            - front
