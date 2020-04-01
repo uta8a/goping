@@ -57,7 +57,7 @@ export default {
     }
   },
   mounted: function() {
-    axios.get('http://localhost:8001/api/v1/all')
+    axios.get(`${process.env.VUE_APP_API_HOST}:8001/api/v1/all`)
       .then(res => {
         (this.info = res.data)
         // console.log(res)
