@@ -18,8 +18,6 @@ services:
       - "api"
     ports:
       - "80:80"
-    args:
-      VUE_APP_API_HOST: $VUE_APP_API_HOST
     logging:
       driver: awslogs
       options:
