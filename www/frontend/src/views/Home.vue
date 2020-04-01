@@ -56,9 +56,6 @@ export default {
       }
     }
   },
-  components: {
-    HelloWorld
-  },
   mounted: function() {
     axios.get('http://localhost:8001/api/v1/all')
       .then(res => {
