@@ -1,8 +1,8 @@
 version: "3"
 services:
   api:
-    image: $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/goecho-api:$CIRCLE_SHA1
-    # image: $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/goecho-api:latest
+    # image: $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/goping-api:$CIRCLE_SHA1
+    image: $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/goping-api:latest
     ports:
       - "8001:8001"
     logging:
@@ -12,8 +12,8 @@ services:
         awslogs-region: $AWS_DEFAULT_REGION
         awslogs-stream-prefix: api
   frontend:
-    image: $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/goping-www:$CIRCLE_SHA1
-    # image: $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/goping-www:latest
+    # image: $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/goping-front:$CIRCLE_SHA1
+    image: $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/goping-front:latest
     depends_on:
       - "api"
     ports:
@@ -21,6 +21,6 @@ services:
     logging:
       driver: awslogs
       options:
-        awslogs-group: goping-www
+        awslogs-group: goping-front
         awslogs-region: $AWS_DEFAULT_REGION
-        awslogs-stream-prefix: www  
+        awslogs-stream-prefix: front 
