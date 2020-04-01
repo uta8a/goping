@@ -1,6 +1,8 @@
 # for build
 FROM node:13.12.0-alpine3.11 AS builder
 
+ARG VUE_APP_API_HOST
+
 RUN apk update && \
     npm install -g npm && \
     npm install -g @vue/cli
