@@ -16,8 +16,8 @@ jobs:
             sudo curl -o /usr/local/bin/ecs-cli https://amazon-ecs-cli.s3.amazonaws.com/ecs-cli-linux-amd64-latest
             sudo chmod +x /usr/local/bin/ecs-cli
             ecs-cli --version
-             ecs-cli configure profile --profile-name fargate-sample --access-key $AWS_ACCESS_KEY_ID --secret-key $AWS_SECRET_ACCESS_KEY
-            ecs-cli configure --cluster fargate-sample-cluster --default-launch-type FARGATE --region $AWS_REGION --config-name fargate-sample
+            ecs-cli configure profile --profile-name fargate-sample --access-key $AWS_ACCESS_KEY_ID --secret-key $AWS_SECRET_ACCESS_KEY
+            ecs-cli configure --cluster fargate-sample-cluster --default-launch-type FARGATE --region $AWS_DEFAULT_REGION --config-name fargate-sample
             ecs-cli configure profile default --profile-name fargate-sample
       - run:
           name: update
@@ -51,6 +51,7 @@ workflows:
           path: './www' # Dockerfile
           repo: 'goping-front'
           tag: '${CIRCLE_SHA1}'
+          extra-build-args: "--build-arg VUE_APP_API_HOST=$VUE_APP_API_HOST"
       
       # - aws-ecs/deploy-service-update:
       #     requires:
