@@ -1,5 +1,13 @@
 # 作業手順書
 
+- [最初のdeploy][title-1]
+- [CI][title-2]
+- [内容][title-3] frontとapiのコードについて
+
+[title-1]: #最初のdeploy
+[title-2]: #ci
+[title-3]: #内容
+
 ## 最初のdeploy
 - vpc, security groupを作る
 - clusterを一つ立ち上げる
@@ -32,6 +40,7 @@ $ export AWS_ACCESS_KEY_ID="XXX" AWS_SECRET_ACCESS_KEY="XXX"
 ```
 - この値は`aws configure`で取得したもの
 ```
+$ ecs-cli configure profile --access-key $AWS_ACCESS_KEY_ID --secret-key $AWS_SECRET_ACCESS_KEY --profile-name fargate-sample
 $ ecs-cli configure --cluster fargate-sample-cluster --region ap-northeast-1 --default-launch-type FARGATE --config-name fargate-sample
 $ ecs-cli configure profile default --profile-name fargate-sample
 ```
@@ -49,11 +58,12 @@ $ aws cloudformation create-stack --stack-name fargate-sample-alb --template-bod
 ```
 - cloudformationのコンソールでALBができるのを待つ。(5分ほど時間がかかる)
 - ここで`goping-dev-alb`という名前のALBが作成されるのでDNS nameを控えておく
-- DNS nameはfrontからapiにアクセスするときに使うので、VUE_APP_API_HOSTに設定しておく
+- DNS nameはfrontからapiにアクセスするときに使うので、VUE_APP_API_HOSTに設定しておく(`http://xxx.com`の形にしておく)
 ```
 $ export VUE_APP_API_HOST="XXX"
 ```
 - 次に、docker imageをECRに登録してpushする。
+- ここではtag: latestを使うので、docker-compose.ecs.ymlのimageで`$CIRCLE_SHA1`の行をコメントアウトして、latestのタグの行を使う。最初のデプロイだけlatestなので、service完了してCIの準備もできたら元に戻す。
 - まずはfrontのコンテナから
 - AWS_ACCOUNT_IDはMy Accountから見れる
 ```
@@ -87,6 +97,8 @@ $ export SECURITY_GROUP="XXX"
 $ export TG_API="XXX" TG_FRONT="XXX"
 ```
 - `ecs-cli compose service up`でサービスを立ち上げる
+- docker-compose.ecs.ymlでlatestタグを使っているかもう一度確認
+- **IAMのRoleへのPolicy付与?**
 - まずapiのサービスから
 ```
 $ ecs-cli compose --project-name goping-api -f docker-compose.ecs.yml --ecs-params ecs-params.yml --cluster fargate-sample-cluster service up --deployment-max-percent 200 --deployment-min-healthy-percent 50 --target-group-arn $TG_API --container-name api --container-port 8001 --launch-type FARGATE --health-check-grace-period 120 --create-log-groups --timeout 10
@@ -112,8 +124,26 @@ SECURITY_GROUP
 SUBNET_1
 SUBNET_2
 VUE_APP_API_HOST
+AWS_REGION
 ```
 - AWS_ECR_ACCOUNT_URLは`$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com`を設定すればよい
+- さらに、docker-compose.ecs.ymlでimageに`$CIRCLE_SHA1`が使われているか確認(最初のdeployでlatestを使っていたのを、`$CIRCLE_SHA1`に戻す)
 - あとはGitHubにpushすればCircleCIが走る
 - DNS nameにアクセスしてうまくいっているか確認
 - 変だと思ったらCloudWatchを確認
+
+## 内容
+### front
+- www/frontend/ で管理
+- vue
+- vue cli 3で生成しており、vue-routerを使用。JavaScriptで書いている
+- frontend/views/Home.vueで`/`の内容を書いている。axiosでapi側から情報を取得
+- frontend/router/index.jsでルーティングしている
+
+### api
+- api/ で管理
+- golang(1.14)
+- Echo v4を使用
+- handler/handler.goにほぼすべての挙動を書いている
+- apiのURLはすべて`/api/v1/xxx`という形で書く。現在は`/api/v1/all`でIPなどの情報が得られる
+- サーバが立ち上がっているか確認用に`/hc`を使っている
