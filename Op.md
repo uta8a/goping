@@ -69,7 +69,7 @@ $ export VUE_APP_API_HOST="XXX"
 ```
 $ export AWS_ACCOUNT_ID="XXX" AWS_DEFAULT_REGION="ap-northeast-1"
 $ aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
-$ docker build -t goping-front www/
+$ docker build -t goping-front www/ --build-arg VUE_APP_API_HOST=$VUE_APP_API_HOST
 $ aws ecr create-repository \
     --repository-name goping-front \
     --image-scanning-configuration scanOnPush=true \
@@ -98,7 +98,11 @@ $ export TG_API="XXX" TG_FRONT="XXX"
 ```
 - `ecs-cli compose service up`でサービスを立ち上げる
 - docker-compose.ecs.ymlでlatestタグを使っているかもう一度確認
-- **IAMのRoleへのPolicy付与?**
+- gopingRoleへのRole付与を行う
+```
+$ aws iam --region ap-northeast-1 create-role --role-name gopingRole --assume-role-policy-document file://task-role.json
+$ aws iam --region ap-northeast-1 attach-role-policy --role-name gopingRole --policy-arn arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+```
 - まずapiのサービスから
 ```
 $ ecs-cli compose --project-name goping-api -f docker-compose.ecs.yml --ecs-params ecs-params.yml --cluster fargate-sample-cluster service up --deployment-max-percent 200 --deployment-min-healthy-percent 50 --target-group-arn $TG_API --container-name api --container-port 8001 --launch-type FARGATE --health-check-grace-period 120 --create-log-groups --timeout 10
@@ -127,6 +131,7 @@ VUE_APP_API_HOST
 AWS_REGION
 ```
 - AWS_ECR_ACCOUNT_URLは`$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com`を設定すればよい
+- AWS_REGIONはCircleCI Orbsで使う。
 - さらに、docker-compose.ecs.ymlでimageに`$CIRCLE_SHA1`が使われているか確認(最初のdeployでlatestを使っていたのを、`$CIRCLE_SHA1`に戻す)
 - あとはGitHubにpushすればCircleCIが走る
 - DNS nameにアクセスしてうまくいっているか確認
